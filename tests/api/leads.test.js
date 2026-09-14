@@ -28,8 +28,8 @@ const createRequest = (body, ip) => ({
   method: 'POST',
   body,
   headers: {
-    host: 'grupo-bilitex-lojista.vercel.app',
-    origin: 'https://grupo-bilitex-lojista.vercel.app',
+    host: 'grupo-bilitex-lojista-v2.vercel.app',
+    origin: 'https://grupo-bilitex-lojista-v2.vercel.app',
     'sec-fetch-site': 'same-origin',
     'x-forwarded-for': ip,
     'x-vercel-oidc-token': 'test-oidc-token',
@@ -130,7 +130,7 @@ test('envia uma vez ao webhook com enriquecimento normalizado', async () => {
   assert.equal(payload.cnpj_validation_status, 'cadastral_valid');
   assert.equal(payload.fonte, 'SINTEGRA');
   assert.equal(payload.company.razao_social, 'Empresa Fictícia Ltda');
-  assert.equal(payload.source, 'grupo-bilitex-lojista');
+  assert.equal(payload.source, 'grupo-bilitex-lojista-v2');
   assert.equal(payload.lead_score, payload.value);
   assert.equal(payload.city, 'Itajaí');
   assert.equal(payload.state, 'SC');

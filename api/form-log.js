@@ -1,4 +1,4 @@
-import { isSameOrigin } from '@jussimirvfx/cnpj-cascade/vercel';
+import { isSameOrigin } from './_lib/same-origin.js';
 import { recordFormBackup } from './_lib/formBackup.js';
 
 export default async function handler(req, res) {

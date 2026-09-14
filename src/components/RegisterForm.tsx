@@ -7,7 +7,7 @@ import {
   formatCNPJ,
   isValidCNPJ,
   normalizeCNPJ,
-} from '@jussimirvfx/cnpj-cascade/browser';
+} from '../lib/cnpj.js';
 
 import { storeOptions, physicalStoreOptions, brandOptions, qualifyLead } from '../lib/leadQualification.js';
 
@@ -131,7 +131,7 @@ export const RegisterForm: React.FC = () => {
           cnpj_digits: normalizeCNPJ(formData.cnpj),
           cnpj_validation_status: 'checksum_valid',
           submittedAt: new Date().toISOString(),
-          source: 'grupo-bilitex-lojista',
+          source: 'grupo-bilitex-lojista-v2',
           url: window.location.href,
         }),
       });

@@ -1,8 +1,8 @@
 import {
   formatCNPJ,
   normalizeCNPJ,
-} from '@jussimirvfx/cnpj-cascade';
-import { isSameOrigin } from '@jussimirvfx/cnpj-cascade/vercel';
+} from '../src/lib/cnpj.js';
+import { isSameOrigin } from './_lib/same-origin.js';
 import { lookupCNPJViaVFX } from './_lib/cnpj-api.js';
 
 import { qualifyLead } from '../src/lib/leadQualification.js';
@@ -91,7 +91,7 @@ export const buildLeadPayload = (body, cnpjLookup) => {
     storeType: String(body.storeType).trim(),
     interestedBrand: String(body.interestedBrand).trim(),
     submittedAt: typeof body.submittedAt === 'string' ? body.submittedAt : new Date().toISOString(),
-    source: 'grupo-bilitex-lojista',
+    source: 'grupo-bilitex-lojista-v2',
     url: typeof body.url === 'string' ? body.url : '',
   };
 };

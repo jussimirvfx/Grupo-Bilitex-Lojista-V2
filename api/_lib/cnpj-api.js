@@ -1,5 +1,5 @@
 const CNPJ_API_URL = 'https://validador-cnpj.vfxaceleradordevendas.com.br/api/v1/cnpj';
-const LANDING_ID = 'grupo-bilitex-lojista';
+const LANDING_ID = 'grupo-bilitex-lojista-v2';
 const LOOKUP_TIMEOUT_MS = 12_000;
 
 const header = (request, name) => {

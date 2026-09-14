@@ -1,8 +1,8 @@
 import {
   isValidCNPJ,
   normalizeCNPJ,
-} from '@jussimirvfx/cnpj-cascade/browser';
-import { isSameOrigin } from '@jussimirvfx/cnpj-cascade/vercel';
+} from '../src/lib/cnpj.js';
+import { isSameOrigin } from './_lib/same-origin.js';
 import { lookupCNPJViaVFX } from './_lib/cnpj-api.js';
 
 export default async function handler(req, res) {
