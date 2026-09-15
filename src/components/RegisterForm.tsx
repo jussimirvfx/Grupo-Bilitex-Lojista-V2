@@ -258,19 +258,6 @@ export const RegisterForm: React.FC = () => {
                     {FORM_CONTENT.successMessage}
                   </p>
                 </div>
-                <div className="pt-4">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => {
-                      setSubmitted(false);
-                      setFormData({ ...emptyForm });
-                    }}
-                    className="inline-flex items-center justify-center bg-black text-white hover:bg-[#B1AEA7] hover:text-black transition-colors text-xs font-semibold px-6 py-3 cursor-pointer focus:outline-none"
-                  >
-                    Enviar novo cadastro
-                  </motion.button>
-                </div>
               </motion.div>
             ) : (
               <motion.form 
