@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { FORM_CONTENT } from '../data/content';
 import { RegisterFormData } from '../types';
-import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   formatCNPJ,
@@ -9,7 +9,7 @@ import {
   normalizeCNPJ,
 } from '../lib/cnpj.js';
 
-import { storeOptions, physicalStoreOptions, brandOptions, qualifyLead } from '../lib/leadQualification.js';
+import { storeOptions, physicalStoreOptions, brandOptions, qualifyLead, isCuratedOut } from '../lib/leadQualification.js';
 
 import { validateLead } from '../lib/leadValidation.js';
 import { useMetaPixel } from 'scoretrack';
@@ -41,6 +41,7 @@ export const RegisterForm: React.FC = () => {
   const [formData, setFormData] = useState<RegisterFormData>({ ...emptyForm });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [curatedOut, setCuratedOut] = useState(false);
   const [loading, setLoading] = useState(false);
   const submitting = useRef(false);
 
@@ -115,6 +116,11 @@ export const RegisterForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting.current) return;
+    if (isCuratedOut(formData)) {
+      logLeadScore(qualifyLead(formData), 'curadoria');
+      setCuratedOut(true);
+      return;
+    }
     const validationErrors = validateLead(formData);
     if (Object.keys(validationErrors).length) { showErrors(validationErrors); return; }
     submitting.current = true;
@@ -146,6 +152,10 @@ export const RegisterForm: React.FC = () => {
       if (!response.ok) {
         if (result.errors) { showErrors(result.errors); return; }
         throw new Error('lead-service-unavailable');
+      }
+      if (result.curatedOut) {
+        setCuratedOut(true);
+        return;
       }
       setSubmitted(true);
       setErrors({});
@@ -199,7 +209,31 @@ export const RegisterForm: React.FC = () => {
         >
           
           <AnimatePresence mode="wait">
-            {submitted ? (
+            {curatedOut ? (
+              <motion.div
+                key="curated-out"
+                id="curation-result"
+                tabIndex={-1}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
+                onAnimationComplete={() => {
+                  document.getElementById('curation-result')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  document.getElementById('curation-result')?.focus({ preventScroll: true });
+                }}
+                role="status"
+                className="py-12 text-center space-y-6"
+              >
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 text-red-600">
+                  <X size={36} aria-hidden="true" />
+                </div>
+                <div className="space-y-6 max-w-lg mx-auto text-base text-black/80">
+                  <p>Infelizmente, informamos que o seu cadastro não foi selecionado para avançarmos neste momento.</p>
+                  <p>Como nosso processo de entrada passa por uma curadoria interna, não conseguiremos seguir com a parceria agora.</p>
+                  <p>Agradecemos o seu interesse na nossa marca e desejamos muito sucesso!</p>
+                </div>
+              </motion.div>
+            ) : submitted ? (
               <motion.div 
                 key="success"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -212,7 +246,7 @@ export const RegisterForm: React.FC = () => {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', stiffness: 200, damping: 12, delay: 0.1 }}
-                  className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-black text-white"
+                  className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-600"
                 >
                   <CheckCircle2 size={36} />
                 </motion.div>

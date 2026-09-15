@@ -5,7 +5,7 @@ import {
 import { isSameOrigin } from './_lib/same-origin.js';
 import { lookupCNPJViaVFX } from './_lib/cnpj-api.js';
 
-import { qualifyLead } from '../src/lib/leadQualification.js';
+import { qualifyLead, isCuratedOut } from '../src/lib/leadQualification.js';
 import { validateLead } from '../src/lib/leadValidation.js';
 import { recordFormBackup } from './_lib/formBackup.js';
 
@@ -115,6 +115,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ ok: false, error: 'invalid-fields', errors });
   }
 
+  if (isCuratedOut(body)) {
+    return res.status(200).json({ ok: false, curatedOut: true, scoring: qualifyLead(body) });
+  }
+
   const webhookURL = process.env.N8N_GRUPO_BILITEX_WEBHOOK_URL;
   // A localização e a idade vêm da API central, nunca do navegador.
   let cnpjLookup = {
@@ -137,6 +141,9 @@ export default async function handler(req, res) {
   const scoring = { city, state, tempoCnpj, cnpj_age_years, data_abertura, lead_score, value, currency,
     lead_score_details, qualification_status, qualified, disqualified, disqualification_reasons,
     qualification_pending_reasons, score_complete };
+  if (isCuratedOut(body, scoring)) {
+    return res.status(200).json({ ok: false, curatedOut: true, scoring });
+  }
   await recordFormBackup(payload, req, { source: 'server-validated', webhookConfigured: Boolean(webhookURL) });
   console.info(JSON.stringify({ msg: 'lead_scoring', ...scoring }));
   if (!webhookURL) {

@@ -1,10 +1,19 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { qualifyLead, companyAge, storeOptions } from '../../src/lib/leadQualification.js';
+import { qualifyLead, companyAge, storeOptions, isCuratedOut } from '../../src/lib/leadQualification.js';
 
 const now = new Date('2026-09-14T12:00:00Z');
 const data = { storeType: 'multimarcas', hasPhysicalStore: 'yes' };
 const company = { data_abertura: '14/09/2020', endereco: { cidade: 'Itajaí', uf: 'SC' } };
+
+test('curadoria usa somente os três critérios solicitados e permite CNPJ com um ano completo', () => {
+  for (const option of storeOptions) {
+    assert.equal(isCuratedOut({ storeType: option.value, hasPhysicalStore: 'no' }),
+      ['autonomo', 'magazine'].includes(option.value));
+  }
+  assert.equal(isCuratedOut(data, qualifyLead(data, { ...company, data_abertura: '15/09/2025' }, now)), true);
+  assert.equal(isCuratedOut(data, qualifyLead(data, { ...company, data_abertura: '14/09/2025' }, now)), false);
+});
 
 test('máximo 100, soma auditável e campos básicos sem pontos', () => {
   const score = qualifyLead(data, company, now);

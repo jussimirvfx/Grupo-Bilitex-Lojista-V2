@@ -71,6 +71,41 @@ afterEach(() => {
   else process.env.N8N_GRUPO_BILITEX_WEBHOOK_URL = originalWebhook;
 });
 
+test('curadoria bloqueia autônomo e magazine antes de consulta, backup e webhook', async () => {
+  let calls = 0;
+  globalThis.fetch = async () => { calls++; throw new Error('não deve enviar'); };
+  for (const [index, storeType] of ['autonomo', 'magazine', 'Revendedor(a) autônomo(a)', 'Magazine'].entries()) {
+    const response = createResponse();
+    await handler(createRequest({ ...validBody, storeType }, `192.0.2.${80 + index}`), response);
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.ok, false);
+    assert.equal(response.body.curatedOut, true);
+  }
+  assert.equal(calls, 0);
+  assert.equal(logs.length, 0);
+});
+
+test('CNPJ com menos de um ano para antes do backup e webhook, ignorando idade do navegador', async () => {
+  const calls = [];
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    assert.match(String(url), /validador-cnpj\.vfxaceleradordevendas\.com\.br/);
+    return new Response(JSON.stringify({
+      cnpj: '60887522000189', cnpj_valido: true, encontrado: true, fonte: 'SINTEGRA',
+      company: { razao_social: 'Empresa Teste', data_abertura: new Date().toISOString().slice(0, 10),
+        endereco: { cidade: 'Itajaí', estado: 'SC' } },
+    }), { status: 200 });
+  };
+  const response = createResponse();
+  await handler(createRequest({ ...validBody, tempoCnpj: 'mais-de-5-anos' }, '192.0.2.85'), response);
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.body.ok, false);
+  assert.equal(response.body.curatedOut, true);
+  assert.equal(response.body.scoring.tempoCnpj, 'menos-de-1-ano');
+  assert.equal(calls.length, 1);
+  assert.equal(logs.length, 0);
+});
+
 test('bloqueia CNPJ inválido antes da cascata e do webhook', async () => {
   let calls = 0;
   globalThis.fetch = async () => {

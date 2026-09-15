@@ -19,6 +19,12 @@ export const ageOptions = [
 const states = 'SP RJ MG RS PR SC GO DF BA PE CE ES MT MS PB RN AL SE PI MA TO PA AM RO AC RR AP'.split(' ');
 export const brandOptions = ['Bakulelê', 'Biliton', 'As duas marcas'];
 
+export function isCuratedOut(data, scoring = {}) {
+  const store = storeOptions.find(option => option.value === data.storeType || option.label === data.storeType);
+  return store?.value === 'autonomo' || store?.value === 'magazine'
+    || scoring.tempoCnpj === 'menos-de-1-ano';
+}
+
 export function companyAge(openingDate, now = new Date()) {
   const raw = String(openingDate || '');
   const parts = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(raw);
