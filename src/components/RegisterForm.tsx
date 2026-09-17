@@ -14,6 +14,8 @@ import { storeOptions, physicalStoreOptions, brandOptions, qualifyLead, isCurate
 import { validateLead } from '../lib/leadValidation.js';
 import { useMetaPixel } from 'scoretrack';
 import { trackAcceptedLead } from '../lib/metaLead.js';
+import { createFormResponseError, getFormErrorMessage } from "../../lib/vfx-form-errors";
+
 
 const emptyForm: RegisterFormData = {
   storeName: '', contactName: '', email: '', whatsapp: '', cnpj: '',
@@ -151,7 +153,7 @@ export const RegisterForm: React.FC = () => {
       }
       if (!response.ok) {
         if (result.errors) { showErrors(result.errors); return; }
-        throw new Error('lead-service-unavailable');
+        throw await createFormResponseError(response, result);
       }
       if (result.curatedOut) {
         setCuratedOut(true);
@@ -160,10 +162,10 @@ export const RegisterForm: React.FC = () => {
       setSubmitted(true);
       setErrors({});
       void trackAcceptedLead(formData, result.scoring, { trackLead, trackLeadQualificado });
-    } catch {
+    } catch (formError) {
       setErrors(prev => ({
         ...prev,
-        submit: 'Não foi possível enviar sua solicitação. Tente novamente em instantes.',
+        submit: getFormErrorMessage(formError, "Não foi possível concluir o envio agora. Suas respostas foram mantidas no formulário. Tente enviar novamente em instantes."),
       }));
     } finally {
       submitting.current = false;
