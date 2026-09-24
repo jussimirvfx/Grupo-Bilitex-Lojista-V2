@@ -17,6 +17,7 @@ const BrandCarousel: React.FC<BrandCarouselProps> = ({ items }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [itemsPerView, setItemsPerView] = useState(4);
   const touchStartX = useRef<number | null>(null);
+  const maxIndex = Math.max(0, items.length - itemsPerView);
 
   // Responsive items per view detection (1 on mobile, 2 on tablet, 4 on desktop)
   useEffect(() => {
@@ -35,22 +36,25 @@ const BrandCarousel: React.FC<BrandCarouselProps> = ({ items }) => {
     return () => window.removeEventListener('resize', updateItemsPerView);
   }, []);
 
-  // Auto-scroll every 3s smoothly
+  useEffect(() => {
+    setCurrentIndex((prev) => Math.min(prev, maxIndex));
+  }, [maxIndex]);
+
   useEffect(() => {
     if (isHovered) return;
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % items.length);
+      setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [items.length, isHovered]);
+  }, [isHovered, maxIndex]);
 
   const handlePrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
+    setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
   };
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % items.length);
+    setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
   };
 
   // Touch handlers for mobile swipe
@@ -70,9 +74,6 @@ const BrandCarousel: React.FC<BrandCarouselProps> = ({ items }) => {
     touchStartX.current = null;
     setIsHovered(false);
   };
-
-  // Duplicate items for continuous presentation
-  const extendedItems = [...items, ...items, ...items];
 
   return (
     <div
@@ -100,20 +101,20 @@ const BrandCarousel: React.FC<BrandCarouselProps> = ({ items }) => {
       </button>
 
       {/* Smooth Sliding Track Container */}
-      <div className="overflow-hidden rounded-lg">
+      <div className="overflow-hidden rounded-xl">
         <div
           className="flex transition-transform duration-500 ease-out"
           style={{
-            transform: `translateX(-${(currentIndex % items.length) * (100 / itemsPerView)}%)`,
+            transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
           }}
         >
-          {extendedItems.map((item, idx) => (
+          {items.map((item) => (
             <div
-              key={`${item.id}-${idx}`}
+              key={item.id}
               style={{ width: `${100 / itemsPerView}%` }}
               className="flex-shrink-0 px-2 sm:px-2.5"
             >
-              <div className="relative aspect-[4/5] overflow-hidden bg-[#B1AEA7]/15 rounded-md shadow-xs group">
+              <div className="relative aspect-[4/5] overflow-hidden bg-[#B1AEA7]/15 rounded-xl shadow-xs group">
                 <img
                   src={item.url}
                   alt={item.alt}
@@ -142,8 +143,8 @@ export const Collections: React.FC<CollectionsProps> = ({ onSelectBrandCTA }) =>
           className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4"
         >
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#FBE64E] tracking-tight leading-snug">
-            <span className="block"><em className="italic font-bold">Duas marcas</em> para acompanhar</span>
-            <span className="block">diferentes fases do seu público</span>
+            <span className="block"><span className="font-black">Duas marcas</span><span className="font-medium"> para acompanhar</span></span>
+            <span className="block font-medium">diferentes fases do seu público</span>
           </h2>
           <p className="text-base sm:text-lg text-white leading-relaxed font-normal max-w-2xl mx-auto">
             Do baby ao teen, o Grupo Bilitex reúne coleções desenvolvidas para fortalecer o mix de boutiques e multimarcas.
@@ -164,9 +165,10 @@ export const Collections: React.FC<CollectionsProps> = ({ onSelectBrandCTA }) =>
           className="space-y-8 text-center"
         >
           {/* Brand Title Centered */}
-          <h3 className="text-2xl sm:text-3xl lg:text-4xl text-black tracking-tight font-bold">
-            Bakulelê
-          </h3>
+          <div className="space-y-1">
+            <h3 className="text-2xl sm:text-3xl lg:text-4xl text-black tracking-tight font-bold">{BAKULELE_CONTENT.title}</h3>
+            <p className="text-base sm:text-lg font-bold text-black">{BAKULELE_CONTENT.collection}</p>
+          </div>
 
           {/* Smooth Continuous Carousel */}
           <BrandCarousel items={BAKULELE_CONTENT.gallery} />
@@ -179,7 +181,7 @@ export const Collections: React.FC<CollectionsProps> = ({ onSelectBrandCTA }) =>
                   key={idx}
                   whileHover={{ y: -4, scale: 1.02 }}
                   transition={{ duration: 0.2 }}
-                  className="bg-[#FBE64E] p-4 rounded-md text-center font-semibold text-sm sm:text-base text-black flex items-center justify-center min-h-[72px] shadow-sm hover:shadow-md cursor-default"
+                  className="bg-[#FBE64E] p-4 rounded-xl text-center font-semibold text-sm sm:text-base text-black flex items-center justify-center min-h-[72px] shadow-sm hover:shadow-md cursor-default"
                 >
                   {topic}
                 </motion.div>
@@ -193,7 +195,7 @@ export const Collections: React.FC<CollectionsProps> = ({ onSelectBrandCTA }) =>
               whileHover={{ scale: 1.04, backgroundColor: '#333333' }}
               whileTap={{ scale: 0.97 }}
               onClick={() => onSelectBrandCTA('Bakulelê')}
-              className="inline-flex items-center justify-center bg-black text-white transition-colors text-sm sm:text-base font-bold px-8 py-4 tracking-wide cursor-pointer focus:outline-none shadow-md"
+              className="inline-flex items-center justify-center bg-black text-white rounded-xl transition-colors text-sm sm:text-base font-bold px-8 py-4 tracking-wide cursor-pointer focus:outline-none shadow-md"
             >
               {BAKULELE_CONTENT.ctaText}
             </motion.button>
@@ -209,9 +211,10 @@ export const Collections: React.FC<CollectionsProps> = ({ onSelectBrandCTA }) =>
           className="space-y-8 text-center pt-2"
         >
           {/* Brand Title Centered */}
-          <h3 className="text-2xl sm:text-3xl lg:text-4xl text-black tracking-tight font-bold">
-            Biliton
-          </h3>
+          <div className="space-y-1">
+            <h3 className="text-2xl sm:text-3xl lg:text-4xl text-black tracking-tight font-bold">{BILITON_CONTENT.title}</h3>
+            <p className="text-base sm:text-lg font-bold text-black">{BILITON_CONTENT.collection}</p>
+          </div>
 
           {/* Smooth Continuous Carousel */}
           <BrandCarousel items={BILITON_CONTENT.gallery} />
@@ -224,7 +227,7 @@ export const Collections: React.FC<CollectionsProps> = ({ onSelectBrandCTA }) =>
                   key={idx}
                   whileHover={{ y: -4, scale: 1.02 }}
                   transition={{ duration: 0.2 }}
-                  className="bg-[#FBE64E] p-4 rounded-md text-center font-semibold text-sm sm:text-base text-black flex items-center justify-center min-h-[72px] shadow-sm hover:shadow-md cursor-default"
+                  className="bg-[#FBE64E] p-4 rounded-xl text-center font-semibold text-sm sm:text-base text-black flex items-center justify-center min-h-[72px] shadow-sm hover:shadow-md cursor-default"
                 >
                   {topic}
                 </motion.div>
@@ -238,7 +241,7 @@ export const Collections: React.FC<CollectionsProps> = ({ onSelectBrandCTA }) =>
               whileHover={{ scale: 1.04, backgroundColor: '#333333' }}
               whileTap={{ scale: 0.97 }}
               onClick={() => onSelectBrandCTA('Biliton')}
-              className="inline-flex items-center justify-center bg-black text-white transition-colors text-sm sm:text-base font-bold px-8 py-4 tracking-wide cursor-pointer focus:outline-none shadow-md"
+              className="inline-flex items-center justify-center bg-black text-white rounded-xl transition-colors text-sm sm:text-base font-bold px-8 py-4 tracking-wide cursor-pointer focus:outline-none shadow-md"
             >
               {BILITON_CONTENT.ctaText}
             </motion.button>

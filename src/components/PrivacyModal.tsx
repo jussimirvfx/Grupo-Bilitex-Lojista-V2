@@ -11,7 +11,7 @@ export const PrivacyModal: React.FC<PrivacyModalProps> = ({ isOpen, onClose }) =
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-      <div className="bg-white w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6 sm:p-8 text-left space-y-6 relative shadow-2xl">
+      <div className="bg-white rounded-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6 sm:p-8 text-left space-y-6 relative shadow-2xl">
         
         <div className="flex items-center justify-between border-b border-[#B1AEA7]/20 pb-4">
           <h3 className="text-xl font-bold text-black uppercase tracking-wider">
@@ -50,7 +50,7 @@ export const PrivacyModal: React.FC<PrivacyModalProps> = ({ isOpen, onClose }) =
         <div className="pt-4 border-t border-[#B1AEA7]/20 flex justify-end">
           <button
             onClick={onClose}
-            className="bg-black text-white hover:bg-[#B1AEA7] hover:text-black transition-colors text-xs font-bold px-6 py-2.5 uppercase tracking-wider cursor-pointer focus:outline-none"
+            className="bg-black text-white rounded-xl hover:bg-[#B1AEA7] hover:text-black transition-colors text-xs font-bold px-6 py-2.5 uppercase tracking-wider cursor-pointer focus:outline-none"
           >
             Compreendi
           </button>
